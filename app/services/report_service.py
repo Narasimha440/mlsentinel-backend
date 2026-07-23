@@ -23,7 +23,7 @@ class ReportService:
 
         tracker = TrendTracker(storage=storage, project=report.project, model=report.model)
         trend_findings = [
-            f"{metric} dropped accuracy to recent average - possible regressions."
+            f"{metric} dropped compared to recent average - possible regressions."
             for metric in ["accuracy", "precisio", "recall", "f1_score"]
             if metric in report.metrics and tracker.detect_drop(metric)
         ]
