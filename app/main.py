@@ -7,7 +7,7 @@ from fastapi import FastAPI
 app = FastAPI(
     title = "MLSentinal API",
     description = "Backend api for mlsentinal to sending the model details to the official mlsentinal dashboard",
-    version = "0.1.0"
+    version = "0.1.2"
 )
 
 app.include_router(
