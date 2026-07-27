@@ -1,5 +1,5 @@
 from .models import Rule
-from .conditions import LessThan, GreaterThan, GapExceeds
+from .conditions import LessThan, GreaterThan, GapExceeds, AbsGapExceeds
 from .thresholds import Thresholds
 from .severity import Severity
 
@@ -32,7 +32,7 @@ RULES = [
          "Add regularization, reduce model complexity, or get more training data."),
 
     Rule("precision_recall_imbalance", Severity.INFO, "performance",
-         GapExceeds("precision", "recall", 0.25),
+         AbsGapExceeds("precision", "recall", 0.25),
          "Precision and recall are significantly imbalanced.",
          "Review whether your decision threshold matchs the cot of false positives vs false negatives."),
 ]

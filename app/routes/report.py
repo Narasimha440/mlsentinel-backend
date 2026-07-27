@@ -12,5 +12,5 @@ from app.services.report_service import ReportService
 router = APIRouter()
 
 @router.post("/report")
-def receive_report(report: ReportRequest, api_key: str = Depends(verify_api_key), db: Session = Depends(get_db),):
-    return ReportService.process_method(report, db)
+def receive_report(report: ReportRequest, owner_uid: str = Depends(verify_api_key), db: Session = Depends(get_db)):
+    return ReportService.process_method(report, db, owner_uid)
