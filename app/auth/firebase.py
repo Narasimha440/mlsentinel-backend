@@ -9,6 +9,7 @@ firebase_creds_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 
 if firebase_creds_json:
     cred_dict = json.loads(firebase_creds_json)
+    cred = credentials.Certificate(cred_dict)
 else:
     cred = credentials.Certificate("serviceAccountKey.json")
 
