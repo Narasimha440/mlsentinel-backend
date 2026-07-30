@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title = "MLSentinal API",
     description = "Backend api for mlsentinal to sending the model details to the official mlsentinal dashboard",
-    version = "0.1.4"
+    version = "0.1.5"
 )
 
 app.add_middleware(
@@ -21,8 +21,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://api.mlsentinel.dev/",
-        "https://api.mlsentinel.dev//api/onboarding/status"
+        "https://www.mlsentinel.dev",
+        "https://mlsentinel.dev",
     ],
     allow_credentials=True,
     allow_methods=["*"],
