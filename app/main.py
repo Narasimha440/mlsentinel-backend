@@ -7,6 +7,7 @@ from app.routes.projects import router as projects_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.api_keys import router as api_keys_router
 from app.routes.onboarding import router as onboarding_router
+from app.routes.github import router as github_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -63,6 +64,12 @@ app.include_router(
     onboarding_router,
     prefix="/api",
     tags=["Onboarding"]
+)
+
+app.include_router(
+    github_router,
+    prefix="/api",
+    tags=["Github"]
 )
 
 @app.get("/")
