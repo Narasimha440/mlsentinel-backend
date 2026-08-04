@@ -1,0 +1,14 @@
+name: Run Scheduled Checks
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call run-due-schedules
+        run: |
+          curl -X POST https://api.mlsentinel.dev/api/internal/run-due-schedules \
+            -H "X-Internal-Secret: ${{ secrets.INTERNAL_CRON_SECRET }}"
