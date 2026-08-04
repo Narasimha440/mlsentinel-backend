@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.report import ReportRequest
+from app.models.alert import Alert
 from app.analysisengine.analysis_engine import AnalysisEngine
 from app.analysisengine.trend.storage import RunHistoryStorage
 from app.analysisengine.trend.tracker import TrendTracker
@@ -30,6 +31,15 @@ class ReportService:
             for metric in ["accuracy", "precision", "recall", "f1_score"]
             if metric in report.metrics and tracker.detect_drop(metric)
         ]
+
+        for metric in dropped_metrics:
+            alert = Alert(
+                ml_model_id=ml_model_id,
+                severity="warning",
+                message=f"{metric} dropped compared to recent average - possible regressions.",
+            )
+            db.add(alert)
+        db.commit()
 
         trend_findings = [
             f"{metric} dropped compared to recent average - possible regressions."
