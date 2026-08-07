@@ -7,6 +7,7 @@ from app.models.api_key import APIKey
 from app.models.github_installation import GithubInstallation
 from app.models.alert import Alert
 from app.models.schedule_settings import ScheduleSettings
+from app.models.data_quality_report import DataQualityReport
 
 def init_db():
     Base.metadata.create_all(bind=engine)

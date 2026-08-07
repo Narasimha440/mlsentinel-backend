@@ -101,3 +101,25 @@ def create_model(req: CreateModelRequest, db: Session = Depends(get_db), user: d
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return {"id": model.id, "name": model.name}
+
+@router.post("/models/quick-add")
+def quick_add_model(req: CreateModelRequest, db: Session = Depends(get_db), user: dict = Depends(verify_firebase_token)):
+
+    project = db.query(Project).filter(Project.id == req.project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project no found")
+
+    workspace = db.query(Workspace).filter(Workspace.id == project.workspace_id).first()
+    if not workspace or workspace.owner_firebase_uid != user["uid"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    existing = db.query(MLModel).filter(MLModel.project_id == req.project_id, MLModel.name == req.name.strip()).first()
+    if existing:
+        return {"id": existing.id, "name": existing.name}
+
+    model = MLModel(project_id=req.project_id, name=req.name.strip())
+    db.add(model)
+    db.commit()
+    db.refresh(model)
+
+    return {"id": model.id, "name": model.name}

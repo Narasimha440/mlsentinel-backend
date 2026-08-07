@@ -11,6 +11,10 @@ from app.routes.github import router as github_router
 from app.routes.alerts import router as alerts_router
 from app.routes.settings import router as settings_router
 from app.routes.internal import router as internal_router
+from app.routes.models import router as models_router
+from app.routes.monitoring import router as monitoring_router
+from app.routes.drift import router as drift_router
+from app.routes.data_quality import router as data_quality_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -91,6 +95,30 @@ app.include_router(
     internal_router,
     prefix="/api",
     tags=["Internal"]
+)
+
+app.include_router(
+    models_router,
+    prefix="/api",
+    tags=["Models"]
+)
+
+app.include_router(
+    monitoring_router,
+    prefix="/api",
+    tags=["Monitoring"]
+)
+
+app.include_router(
+    drift_router,
+    prefix="/api",
+    tags=["Drift"]    
+)
+
+app.include_router(
+    data_quality_router,
+    prefix="/api",
+    tags=["Data Quality"]
 )
 
 @app.get("/")
