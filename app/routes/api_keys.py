@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.db.session import get_db
 from app.models.api_key import APIKey
+from app.models.project import Project
 from app.auth.firebase import verify_firebase_token
 
 router = APIRouter()

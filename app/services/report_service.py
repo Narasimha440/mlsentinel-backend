@@ -7,6 +7,7 @@ from app.analysisengine.trend.storage import RunHistoryStorage
 from app.analysisengine.trend.tracker import TrendTracker
 from app.analysisengine.trend.scoring import TrendScoring
 from app.services.hierarchy_service import HierarchyService
+from app.integrations.email_notifier import send_alert_email
 
 
 class ReportService:

@@ -21,7 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title = "MLSentinal API",
     description = "Backend api for mlsentinal to sending the model details to the official mlsentinal dashboard",
-    version = "0.1.8"
+    version = "0.1.9"
 )
 
 app.add_middleware(

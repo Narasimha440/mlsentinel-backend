@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -19,7 +19,25 @@ def get_alerts(db: Session = Depends(get_db), user: dict = Depends(verify_fireba
         return {"alerts": [], "unacknowledged_count": 0}
 
     project_ids = [p.id for p in db.query(Project).filter(Project.workspace_id == workspace.id).all()]
-    model_ids = [m.id for m in db.query(MLModel).filter(MLModel.project_id.in_(project_ids)).all()] if project_ids else []
+
+    if not project_ids:
+        return {
+            "alerts": [],
+            "unacknowledged_count": 0,
+        }
+    
+    model_ids = [
+        m.id
+        for m in db.query(MLModel)
+        .filter(MLModel.project_id.in_(project_ids))
+        .all()
+    ]
+
+    if not model_ids:
+        return {
+            "alerts": [],
+            "unacknowledged_count": 0,
+        }
 
     alerts = (
         db.query(Alert)
@@ -27,10 +45,10 @@ def get_alerts(db: Session = Depends(get_db), user: dict = Depends(verify_fireba
         .order_by(Alert.created_at.desc())
         .limit(50)
         .all()
-    ) if model_ids else []
+    )
 
 
-    unacknowledged_count = sum(1 for a in alerts if not a.acknowledged)
+    unacknowledged_count = sum(1 for alert in alerts if not alert.acknowledged)
 
     return {
         "alerts": [
@@ -42,10 +60,52 @@ def get_alerts(db: Session = Depends(get_db), user: dict = Depends(verify_fireba
 
 @router.post("/alerts/{alert_id}/acknowledge")
 def acknowledge_alert(alert_id: int, db: Session = Depends(get_db), user: dict = Depends(verify_firebase_token)):
-    alert = db.query(Alert).filter(Alert.id == alert_id).first()
+    workspace = (
+        db.query(Workspace)
+        .filter(
+            Workspace.owner_firebase_uid == user["uid"]
+        )
+        .first()
+    )
 
-    if alert:
-        alert.acknowledged = True
-        db.commit()
+    if not workspace:
+        raise HTTPException(
+            status_code=404,
+            detail="Workspace not found",
+        )
 
-    return {"success": True}
+    project_ids = [
+        p.id
+        for p in db.query(Project)
+        .filter(Project.workspace_id == workspace.id)
+        .all()
+    ]
+
+    model_ids = [
+        m.id
+        for m in db.query(MLModel)
+        .filter(MLModel.project_id.in_(project_ids))
+        .all()
+    ]
+
+    alert = (
+        db.query(Alert)
+        .filter(
+            Alert.id == alert_id,
+            Alert.ml_model_id.in_(model_ids),
+        )
+        .first()
+    )
+
+    if not alert:
+        raise HTTPException(
+            status_code=404,
+            detail="Alert not found",
+        )
+    alert.acknowledged = True
+    db.commit()
+
+    return {
+        "success": True,
+        "alert_id": alert.id,
+    }

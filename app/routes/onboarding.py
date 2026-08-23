@@ -123,3 +123,12 @@ def quick_add_model(req: CreateModelRequest, db: Session = Depends(get_db), user
     db.refresh(model)
 
     return {"id": model.id, "name": model.name}
+
+@router.get("/workspace")
+def get_workspace(db: Session = Depends(get_db), user: dict = Depends(verify_firebase_token)):
+    workspace = db.query(Workspace).filter(Workspace.owner_firebase_uid == user["uid"]).first()
+
+    if not workspace:
+        return {"name": None}
+
+    return {"id": workspace.id, "name": workspace.name}
