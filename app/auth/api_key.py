@@ -14,5 +14,5 @@ def verify_api_key(x_api_key: str = Header(...), db: Session = Depends(get_db)) 
             detail="Invalid or revoked API key"
         )
 
-    return {"firebase_uid": key_entry.firebase_uid, "default_ml_model_id": key_entry.default_ml_model_id}
+    return key_entry.firebase_uid
 
