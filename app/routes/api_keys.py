@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from app.db.session import get_db
 from app.models.api_key import APIKey
 from app.models.project import Project
+from app.models.ml_model import MLModel
+from app.models.workspace import Workspace
 from app.auth.firebase import verify_firebase_token
 
 router = APIRouter()
@@ -13,6 +15,7 @@ router = APIRouter()
 
 class CreateKeyRequest(BaseModel):
     label: str = "Untitled key"
+    default_ml_model_id: int
 
 
 @router.get("/api-keys")
@@ -42,8 +45,26 @@ def create_key(req: CreateKeyRequest, db: Session = Depends(get_db), user: dict 
     returned ONLY in this response — the frontend must show it once and
     warn the user to copy it, since it can't be retrieved again after this.
     """
+    model = (
+        db.query(MLModel)
+        .join(Project, MLModel.project_id == Project.id)
+        .join(Workspace, Project.workspace_id == Workspace.id)
+        .filter(
+            MLModel.id == req.default_ml_model_id,
+            Workspace.owner_firebase_uid == user["uid"],
+        )
+        .first()
+    )
+
+    if not model:
+        raise HTTPException(
+            status_code=404,
+            detail="Selected model not found"
+        )
+    
     new_key = "mls_" + secrets.token_hex(24)
-    entry = APIKey(key=new_key, firebase_uid=user["uid"], label=req.label)
+
+    entry = APIKey(key=new_key, firebase_uid=user["uid"], label=req.label, default_ml_model_id=model.id)
     db.add(entry)
     db.commit()
     db.refresh(entry)
@@ -52,6 +73,7 @@ def create_key(req: CreateKeyRequest, db: Session = Depends(get_db), user: dict 
         "id": entry.id,
         "label": entry.label,
         "key": new_key,  # full key, shown once
+        "default_ml_model_id": model.id,
         "created_at": entry.created_at.isoformat(),
     }
 
